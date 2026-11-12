@@ -220,3 +220,33 @@ Travail dans le dossier `~/TP_Shell` (`mkdir -p ~/TP_Shell` puis `cd ~/TP_Shell`
 | 10 | `ls -l` de /etc/passwd, /etc/shadow et du répertoire personnel | `-rw-r--r--. 1 root root 1935 29 oct. 09:57 /etc/passwd` : `-` = fichier ordinaire ; `rw-` propriétaire (lecture, écriture), `r--` groupe, `r--` autres (644 : tout le monde peut lire la liste des comptes) ; `.` = contexte SELinux présent ; `1` = nombre de liens ; propriétaire `root`, groupe `root` ; taille 1935 octets ; date de dernière modification (création de l'utilisateur `yassine`). `----------. … /etc/shadow` : **aucun droit** (000), seul root peut le lire, car il contient les mots de passe chiffrés. `drwx------. 16 yassine yassine 4096 … /home/yassine` : `d` = répertoire, `rwx------` (700) = seul `yassine` peut lister, créer et entrer ; 16 liens (ses sous-dossiers + `.` + `..`) ; 4096 = taille du bloc de répertoire |
 
 ![Partie 5, questions 9 et 10](captures/p5-q09-10.png)
+
+## Partie 6 : Accès distant sécurisé avec SSH
+
+La VM (serveur) est en NAT sur le réseau VMware `VMnet8` (`192.168.197.0/24`) : son adresse est `192.168.197.129`, et l'hôte Windows (poste d'administration) y a l'adresse `192.168.197.1`. Le client est le `ssh` intégré à Windows (PowerShell).
+
+| N° | Question | Réponse |
+|---|---|---|
+| 1 | sshd actif et lancé au démarrage ; pare-feu | `systemctl status sshd` → `Active: active (running)` depuis le démarrage, `Loaded: … enabled` ; le processus principal `sshd -D [listener]` attend les connexions. Le journal en bas montre les connexions récentes (`Accepted publickey`). `systemctl is-enabled sshd` → `enabled` : le service démarre automatiquement au boot. `sudo firewall-cmd --list-services` liste les services autorisés par le pare-feu ; `ssh` doit y figurer pour que le port TCP 22 soit ouvert (voir la 2ème capture) |
+
+![Partie 6, question 1](captures/p6-q01.png)
+
+![Partie 6, question 1 : firewall-cmd](captures/p6-q01-firewall.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 2 | Connexion depuis l'hôte | Depuis PowerShell sous Windows : `ssh yassine@192.168.197.129`. À la première connexion, SSH affiche l'empreinte de la clé du serveur (`ED25519 … SHA256:o0GCGADMs2…`) et demande confirmation (`yes`) ; elle est ensuite enregistrée dans `known_hosts`, ce qui permet de détecter un serveur usurpé lors des connexions suivantes. La capture montre aussi l'installation d'une **clé publique** dans `~/.ssh/authorized_keys` : depuis, la connexion se fait par clé, sans mot de passe (`Accepted publickey` dans le journal de sshd) |
+
+![Partie 6, question 2](captures/p6-q02.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 3 | Vérifier qu'on est sur le serveur ; `who` et `w` avec deux sessions | `hostname` → `localhost.localdomain` (le nom de la VM, pas celui du PC). `echo $SSH_CONNECTION` → `192.168.197.1 64855 192.168.197.129 22` : IP et port du client, puis IP et port (22) du serveur. Avec deux autres sessions SSH ouvertes, `who` liste 3 connexions : `tty2` (session graphique locale) et `pts/1`, `pts/2` (pseudo-terminaux des sessions SSH, venant de `192.168.197.1`). `w` ajoute la charge, le temps d'inactivité et la commande en cours de chaque session (`gnome-session-binary`, `sleep 60`) |
+
+![Partie 6, question 3](captures/p6-q03.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 4 | Commandes à distance sans session interactive | Depuis l'hôte : `ssh yassine@192.168.197.129 "uptime; df -h /"`. SSH se connecte, exécute les commandes sur le serveur, affiche leur sortie puis se déconnecte aussitôt : l'invite `PS C:\Users\yassi>` revient directement. Résultat : la VM est allumée depuis 1 h 13, et `/` (volume LVM `rhel-root`, 20 Go) est utilisé à 24 %. C'est la base de l'automatisation (scripts, supervision de plusieurs serveurs) |
+
+![Partie 6, question 4](captures/p6-q04.png)
