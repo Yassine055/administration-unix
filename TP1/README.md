@@ -4,13 +4,26 @@
 
 ## Partie 1 : Installation de Red Hat Enterprise Linux 9
 
-### Vérification du partitionnement
+### Partitionnement (disque de 100 Go)
 
-![lsblk et df -h](captures/p1-partitions.png)
+| Point de montage | Taille | Type |
+|---|---|---|
+| /boot/efi | 1 Go | partition |
+| /boot | 1 Go | partition |
+| / | 20 Go | LVM |
+| /home | 50 Go | LVM |
+| /var | 24 Go | LVM |
+| swap | 4 Go | LVM |
 
-### Vérification de l'utilisateur administrateur
+Vérification avec `lsblk` :
 
-![groups](captures/p1-utilisateur.png)
+![lsblk](captures/p1-partitions.png)
+
+### Utilisateur administrateur
+
+L'utilisateur `yassine` appartient au groupe `wheel`, ce qui l'autorise à utiliser `sudo`.
+
+![groups et sudo](captures/p1-utilisateur.png)
 
 ### Snapshot « Installation_propre »
 
