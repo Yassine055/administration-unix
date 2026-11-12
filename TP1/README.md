@@ -77,6 +77,7 @@ L'utilisateur `yassine` appartient au groupe `wheel`, ce qui l'autorise à utili
 | 15 | Supprimer TP_Linux et son contenu en une commande | `rm -r ~/TP_Linux` : `-r` (récursif) supprime le dossier, ses sous-dossiers et leurs fichiers. Juste avant, `cat` confirme la modification de Q14 (`Modifié avec nano`). Après : `ls -d TP_Linux` → `impossible d'accéder à 'TP_Linux': Aucun fichier ou dossier de ce type` |
 
 ![Question 15](captures/p2-q15.png)
+
 ## Partie 3 : Découverte du FHS (Filesystem Hierarchy Standard)
 
 | N° | Question | Réponse |
@@ -124,3 +125,50 @@ L'utilisateur `yassine` appartient au groupe `wheel`, ce qui l'autorise à utili
 | 16 | Contenu de /boot, importance au démarrage | Les fichiers nécessaires au démarrage : le noyau `vmlinuz-5.14.0-…`, l'`initramfs` (mini-système chargé en mémoire avec les pilotes nécessaires pour monter `/`), le chargeur GRUB (`grub2/`, entrées dans `loader/`), `config` et `System.map` du noyau, et `efi/` (partition EFI). Sans `/boot`, la machine ne peut pas démarrer. `df -h` → `/boot` sur `/dev/nvme0n1p2` (960 Mo) et `/boot/efi` sur `/dev/nvme0n1p1` (1022 Mo) |
 
 ![Partie 3, questions 14 à 16](captures/p3-q14-16.png)
+
+## Partie 4 : Prise en main du terminal et de l'aide en ligne
+
+| N° | Question | Réponse |
+|---|---|---|
+| 1 | `tty` en console texte (`Ctrl+Alt+F3`) puis dans le terminal graphique | En console texte, `tty` affiche `/dev/tty3` : un **terminal virtuel** du noyau, lié à l'écran et au clavier. Dans le terminal graphique, `tty` affiche `/dev/pts/0` : un **pseudo-terminal** créé par l'application Terminal (même chose pour une session SSH). Sur RHEL 9, `Ctrl+Alt+F1` ramène à l'écran de connexion et `Ctrl+Alt+F2` à la session graphique |
+
+![Partie 4, question 1 : tty en console et en graphique](captures/p4-q01.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 2 | Utilisateur, shell, répertoire personnel ; signification de `$` et `#` | `whoami` → `yassine` ; `echo $SHELL` → `/bin/bash` ; `echo $HOME` → `/home/yassine`. `id` confirme l'appartenance au groupe `wheel` (droit d'utiliser `sudo`). À la fin de l'invite, `$` indique un **utilisateur normal** et `#` indique **root** (super-utilisateur), par exemple après `sudo -i` |
+
+![Partie 4, question 2](captures/p4-q02.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 3 | Rechercher dans `man ls`, quitter, sections du manuel | Dans `man`, on tape `/mot` puis Entrée pour chercher, `n` pour l'occurrence suivante, `N` pour la précédente, et `q` pour quitter. Les **sections** séparent les pages qui portent le même nom : la section 1 = commandes utilisateur, la section 5 = formats de fichiers de configuration (8 = commandes d'administration). `man 1 passwd` décrit la **commande** `passwd` (*update user's authentication tokens*) ; `man 5 passwd` décrit le **fichier** `/etc/passwd` (*password file*) |
+| 4 | `ls --help` contre `man ls` ; `man -k partition` | `ls --help` affiche directement un résumé court, en français (164 lignes) ; `man ls` ouvre la page de manuel complète (245 lignes), en anglais, page par page. `man -k partition` (et `whatis passwd`) → `rien d'adéquat` : l'index des pages de manuel n'est pas encore construit. Il faut d'abord lancer `sudo mandb` (voir la capture ci-dessous) |
+
+![Partie 4, questions 3 et 4](captures/p4-q03-04.png)
+
+![Partie 4, question 3 : recherche dans man ls](captures/p4-q03-man.png)
+
+![Partie 4, question 4 : sudo mandb puis man -k partition](captures/p4-q04-mandb.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 5 | `type` et `which` sur cd, ls, pwd ; builtin, alias, exécutable | `type` → `cd` et `pwd` sont des **primitives du shell** (builtin) ; `ls` est un **alias** vers `ls --color=auto`. `which` cherche des **fichiers exécutables** dans le `PATH` → `/usr/bin/ls`, `/usr/bin/cd`, `/usr/bin/pwd` (sur RHEL, `which` est lui-même un alias qui affiche aussi les alias). `type -a pwd` montre les deux : la primitive est prioritaire sur `/usr/bin/pwd`. Différences : une **primitive** est intégrée à bash et s'exécute sans créer de processus (`cd` doit l'être pour changer le dossier du shell lui-même) ; un **alias** est un raccourci texte remplacé avant l'exécution ; un **exécutable** est un fichier du disque lancé dans un nouveau processus |
+
+![Partie 4, question 5](captures/p4-q05.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 6 | Complétion avec Tab | `cd /usr/sh` + `Tab` complète en `cd /usr/share/` : une seule possibilité, donc la complétion est immédiate. `sys` + `Tab` `Tab` : plusieurs commandes commencent par `sys`, donc rien n'est complété au premier `Tab` et le second affiche la liste des possibilités (`sysctl`, `systemctl`, `systemd-analyze`…) |
+| 7 | `history`, `!!`, `!n`, `Ctrl+R` | `history` affiche les commandes numérotées ; `!!` relance la dernière commande ; `!n` relance la commande numéro `n` ; `Ctrl+R` lance une recherche inversée : on tape un morceau de commande, bash propose la plus récente qui correspond, Entrée l'exécute |
+| 8 | Raccourcis clavier | `Ctrl+C` : interrompt la commande en cours (signal SIGINT) · `Ctrl+L` : efface l'écran (comme `clear`) · `Ctrl+A` : curseur au début de la ligne · `Ctrl+E` : curseur à la fin de la ligne · `Ctrl+U` : efface du curseur jusqu'au début de la ligne · `Ctrl+D` : fin de saisie ; sur une ligne vide, ferme le shell (déconnexion) |
+
+![Partie 4, question 6 : complétion](captures/p4-q06.png)
+
+![Partie 4, question 7 : historique](captures/p4-q07.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 9 | Date, calendrier, durée depuis le démarrage | `date` → `jeu. 12 nov. 2026 10:46:17 +00` (la VM est réglée sur le fuseau UTC) ; `cal` → calendrier de novembre 2026, le jour courant (12) en surbrillance ; `uptime` → heure actuelle, `up 1:08` (allumée depuis 1 h 08), `1 user` connecté, et charge moyenne sur 1, 5 et 15 minutes (`0,10, 0,04, 0,01`) |
+
+![Partie 4, question 9](captures/p4-q09.png)
