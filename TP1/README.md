@@ -130,9 +130,7 @@ L'utilisateur `yassine` appartient au groupe `wheel`, ce qui l'autorise à utili
 
 | N° | Question | Réponse |
 |---|---|---|
-| 1 | `tty` en console texte (`Ctrl+Alt+F3`) puis dans le terminal graphique | Résultat attendu (à confirmer sur la capture) : en console texte, `tty` affiche `/dev/tty3`, un **terminal virtuel** du noyau, lié à l'écran et au clavier. Dans le terminal graphique, `tty` affiche `/dev/pts/N`, un **pseudo-terminal** créé par l'application Terminal (même chose pour une session SSH). Sur RHEL 9, `Ctrl+Alt+F1` ramène à l'écran de connexion et `Ctrl+Alt+F2` à la session graphique |
-
-![Partie 4, question 1 : tty en console et en graphique](captures/p4-q01.png)
+| 1 | `tty` en console texte (`Ctrl+Alt+F3`) puis dans le terminal graphique | Résultat attendu : en console texte, `tty` affiche `/dev/tty3`, un **terminal virtuel** du noyau, lié à l'écran et au clavier. Dans le terminal graphique, `tty` affiche `/dev/pts/N`, un **pseudo-terminal** créé par l'application Terminal (même chose pour une session SSH). Sur RHEL 9, `Ctrl+Alt+F1` ramène à l'écran de connexion et `Ctrl+Alt+F2` à la session graphique |
 
 | N° | Question | Réponse |
 |---|---|---|
@@ -143,13 +141,9 @@ L'utilisateur `yassine` appartient au groupe `wheel`, ce qui l'autorise à utili
 | N° | Question | Réponse |
 |---|---|---|
 | 3 | Rechercher dans `man ls`, quitter, sections du manuel | Dans `man`, on tape `/mot` puis Entrée pour chercher, `n` pour l'occurrence suivante, `N` pour la précédente, et `q` pour quitter. Les **sections** séparent les pages qui portent le même nom : la section 1 = commandes utilisateur, la section 5 = formats de fichiers de configuration (8 = commandes d'administration). `man 1 passwd` décrit la **commande** `passwd` (*update user's authentication tokens*) ; `man 5 passwd` décrit le **fichier** `/etc/passwd` (*password file*) |
-| 4 | `ls --help` contre `man ls` ; `man -k partition` | `ls --help` affiche directement un résumé court, en français (164 lignes) ; `man ls` ouvre la page de manuel complète (245 lignes), en anglais, page par page. `man -k partition` (et `whatis passwd`) → `rien d'adéquat` : l'index des pages de manuel n'est pas encore construit. Il faut d'abord lancer `sudo mandb` (voir la capture ci-dessous) |
+| 4 | `ls --help` contre `man ls` ; `man -k partition` | `ls --help` affiche directement un résumé court, en français (164 lignes) ; `man ls` ouvre la page de manuel complète (245 lignes), en anglais, page par page. `man -k partition` (et `whatis passwd`) → `rien d'adéquat` : l'index des pages de manuel n'est pas encore construit. Il faut d'abord lancer `sudo mandb` |
 
 ![Partie 4, questions 3 et 4](captures/p4-q03-04.png)
-
-![Partie 4, question 3 : recherche dans man ls](captures/p4-q03-man.png)
-
-![Partie 4, question 4 : sudo mandb puis man -k partition](captures/p4-q04-mandb.png)
 
 | N° | Question | Réponse |
 |---|---|---|
@@ -159,13 +153,9 @@ L'utilisateur `yassine` appartient au groupe `wheel`, ce qui l'autorise à utili
 
 | N° | Question | Réponse |
 |---|---|---|
-| 6 | Complétion avec Tab | Comportement attendu (à confirmer sur la capture) : `cd /usr/sh` + `Tab` complète en `cd /usr/share/` car il n'y a qu'une seule possibilité. `sys` + `Tab` `Tab` : plusieurs commandes commencent par `sys`, donc le premier `Tab` ne complète rien et le second affiche la liste des possibilités (`sysctl`, `systemctl`, `systemd-…`) |
+| 6 | Complétion avec Tab | Comportement attendu : `cd /usr/sh` + `Tab` complète en `cd /usr/share/` car il n'y a qu'une seule possibilité. `sys` + `Tab` `Tab` : plusieurs commandes commencent par `sys`, donc le premier `Tab` ne complète rien et le second affiche la liste des possibilités (`sysctl`, `systemctl`, `systemd-…`) |
 | 7 | `history`, `!!`, `!n`, `Ctrl+R` | `history` affiche les commandes numérotées ; `!!` relance la dernière commande ; `!n` relance la commande numéro `n` ; `Ctrl+R` lance une recherche inversée : on tape un morceau de commande, bash propose la plus récente qui correspond, Entrée l'exécute |
 | 8 | Raccourcis clavier | `Ctrl+C` : interrompt la commande en cours (signal SIGINT) · `Ctrl+L` : efface l'écran (comme `clear`) · `Ctrl+A` : curseur au début de la ligne · `Ctrl+E` : curseur à la fin de la ligne · `Ctrl+U` : efface du curseur jusqu'au début de la ligne · `Ctrl+D` : fin de saisie ; sur une ligne vide, ferme le shell (déconnexion) |
-
-![Partie 4, question 6 : complétion](captures/p4-q06.png)
-
-![Partie 4, question 7 : historique](captures/p4-q07.png)
 
 | N° | Question | Réponse |
 |---|---|---|
@@ -190,8 +180,6 @@ Travail dans le dossier `~/TP_Shell` (`mkdir -p ~/TP_Shell` puis `cd ~/TP_Shell`
 
 ![Partie 5, question 3](captures/p5-q03.png)
 
-![Partie 5, question 3 : navigation dans less](captures/p5-q03-less.png)
-
 | N° | Question | Réponse |
 |---|---|---|
 | 4 | `grep` sur son utilisateur ; comptes en /bin/bash | `grep '^yassine:' /etc/passwd` → `yassine:x:1001:1001::/home/yassine:/bin/bash` (`^` = début de ligne : évite d'attraper une autre ligne qui contiendrait « yassine »). `grep -c '/bin/bash$' /etc/passwd` → **3** comptes (`$` = fin de ligne) : `root`, `emsi`, `yassine` |
@@ -208,11 +196,9 @@ Travail dans le dossier `~/TP_Shell` (`mkdir -p ~/TP_Shell` puis `cd ~/TP_Shell`
 
 | N° | Question | Réponse |
 |---|---|---|
-| 8 | `sudo du -sh /var/log/* \| sort -h \| tail -5` | `du -sh` calcule l'espace disque de chaque élément de `/var/log` (`-s` = un total par élément, `-h` = unités lisibles K, M, G) ; `sort -h` trie ces tailles « humaines » de la plus petite à la plus grande ; `tail -5` garde les 5 dernières lignes, donc les 5 plus volumineuses. **Sans `sudo`** (1ère capture), `du` ne peut pas lire plusieurs dossiers (`audit`, `gdm`, `sssd`…) : les erreurs s'affichent et ces dossiers manquent au classement, en tête duquel arrive `anaconda` (8,7M, journaux de l'installation). D'où le besoin de `sudo` (2ème capture) |
+| 8 | `sudo du -sh /var/log/* \| sort -h \| tail -5` | `du -sh` calcule l'espace disque de chaque élément de `/var/log` (`-s` = un total par élément, `-h` = unités lisibles K, M, G) ; `sort -h` trie ces tailles « humaines » de la plus petite à la plus grande ; `tail -5` garde les 5 dernières lignes, donc les 5 plus volumineuses. **Sans `sudo`** (capture ci-dessous), `du` ne peut pas lire plusieurs dossiers (`audit`, `gdm`, `sssd`…) : les erreurs s'affichent et ces dossiers manquent au classement, en tête duquel arrive `anaconda` (8,7M, journaux de l'installation). D'où le besoin de `sudo` |
 
 ![Partie 5, question 8 sans sudo](captures/p5-q08.png)
-
-![Partie 5, question 8 avec sudo](captures/p5-q08-sudo.png)
 
 | N° | Question | Réponse |
 |---|---|---|
@@ -227,11 +213,9 @@ La VM (serveur) est en NAT sur le réseau VMware `VMnet8` (`192.168.197.0/24`) :
 
 | N° | Question | Réponse |
 |---|---|---|
-| 1 | sshd actif et lancé au démarrage ; pare-feu | `systemctl status sshd` → `Active: active (running)` depuis le démarrage, `Loaded: … enabled` ; le processus principal `sshd -D [listener]` attend les connexions. Le journal en bas montre les connexions récentes (`Accepted publickey`). `systemctl is-enabled sshd` → `enabled` : le service démarre automatiquement au boot. `sudo firewall-cmd --list-services` liste les services autorisés par le pare-feu ; `ssh` doit y figurer pour que le port TCP 22 soit ouvert (voir la 2ème capture) |
+| 1 | sshd actif et lancé au démarrage ; pare-feu | `systemctl status sshd` → `Active: active (running)` depuis le démarrage, `Loaded: … enabled` ; le processus principal `sshd -D [listener]` attend les connexions. Le journal en bas montre les connexions récentes (`Accepted publickey`). `systemctl is-enabled sshd` → `enabled` : le service démarre automatiquement au boot. `sudo firewall-cmd --list-services` liste les services autorisés par le pare-feu ; `ssh` doit y figurer pour que le port TCP 22 soit ouvert |
 
 ![Partie 6, question 1](captures/p6-q01.png)
-
-![Partie 6, question 1 : firewall-cmd](captures/p6-q01-firewall.png)
 
 | N° | Question | Réponse |
 |---|---|---|
