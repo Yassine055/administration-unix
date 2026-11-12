@@ -130,7 +130,7 @@ L'utilisateur `yassine` appartient au groupe `wheel`, ce qui l'autorise à utili
 
 | N° | Question | Réponse |
 |---|---|---|
-| 1 | `tty` en console texte (`Ctrl+Alt+F3`) puis dans le terminal graphique | En console texte, `tty` affiche `/dev/tty3` : un **terminal virtuel** du noyau, lié à l'écran et au clavier. Dans le terminal graphique, `tty` affiche `/dev/pts/0` : un **pseudo-terminal** créé par l'application Terminal (même chose pour une session SSH). Sur RHEL 9, `Ctrl+Alt+F1` ramène à l'écran de connexion et `Ctrl+Alt+F2` à la session graphique |
+| 1 | `tty` en console texte (`Ctrl+Alt+F3`) puis dans le terminal graphique | Résultat attendu (à confirmer sur la capture) : en console texte, `tty` affiche `/dev/tty3`, un **terminal virtuel** du noyau, lié à l'écran et au clavier. Dans le terminal graphique, `tty` affiche `/dev/pts/N`, un **pseudo-terminal** créé par l'application Terminal (même chose pour une session SSH). Sur RHEL 9, `Ctrl+Alt+F1` ramène à l'écran de connexion et `Ctrl+Alt+F2` à la session graphique |
 
 ![Partie 4, question 1 : tty en console et en graphique](captures/p4-q01.png)
 
@@ -159,7 +159,7 @@ L'utilisateur `yassine` appartient au groupe `wheel`, ce qui l'autorise à utili
 
 | N° | Question | Réponse |
 |---|---|---|
-| 6 | Complétion avec Tab | `cd /usr/sh` + `Tab` complète en `cd /usr/share/` : une seule possibilité, donc la complétion est immédiate. `sys` + `Tab` `Tab` : plusieurs commandes commencent par `sys`, donc rien n'est complété au premier `Tab` et le second affiche la liste des possibilités (`sysctl`, `systemctl`, `systemd-analyze`…) |
+| 6 | Complétion avec Tab | Comportement attendu (à confirmer sur la capture) : `cd /usr/sh` + `Tab` complète en `cd /usr/share/` car il n'y a qu'une seule possibilité. `sys` + `Tab` `Tab` : plusieurs commandes commencent par `sys`, donc le premier `Tab` ne complète rien et le second affiche la liste des possibilités (`sysctl`, `systemctl`, `systemd-…`) |
 | 7 | `history`, `!!`, `!n`, `Ctrl+R` | `history` affiche les commandes numérotées ; `!!` relance la dernière commande ; `!n` relance la commande numéro `n` ; `Ctrl+R` lance une recherche inversée : on tape un morceau de commande, bash propose la plus récente qui correspond, Entrée l'exécute |
 | 8 | Raccourcis clavier | `Ctrl+C` : interrompt la commande en cours (signal SIGINT) · `Ctrl+L` : efface l'écran (comme `clear`) · `Ctrl+A` : curseur au début de la ligne · `Ctrl+E` : curseur à la fin de la ligne · `Ctrl+U` : efface du curseur jusqu'au début de la ligne · `Ctrl+D` : fin de saisie ; sur une ligne vide, ferme le shell (déconnexion) |
 
@@ -172,3 +172,51 @@ L'utilisateur `yassine` appartient au groupe `wheel`, ce qui l'autorise à utili
 | 9 | Date, calendrier, durée depuis le démarrage | `date` → `jeu. 12 nov. 2026 10:46:17 +00` (la VM est réglée sur le fuseau UTC) ; `cal` → calendrier de novembre 2026, le jour courant (12) en surbrillance ; `uptime` → heure actuelle, `up 1:08` (allumée depuis 1 h 08), `1 user` connecté, et charge moyenne sur 1, 5 et 15 minutes (`0,10, 0,04, 0,01`) |
 
 ![Partie 4, question 9](captures/p4-q09.png)
+
+## Partie 5 : Redirections, tubes (pipes) et filtres de texte
+
+Travail dans le dossier `~/TP_Shell` (`mkdir -p ~/TP_Shell` puis `cd ~/TP_Shell`).
+
+| N° | Question | Réponse |
+|---|---|---|
+| 1 | `>` puis `>>` vers etc.txt, compter les lignes | `ls /etc > etc.txt` crée (ou **écrase**) le fichier → `wc -l etc.txt` → `243`. `ls /var >> etc.txt` **ajoute** à la fin → `264 etc.txt` (243 + 21 entrées de `/var`) |
+| 2 | Séparer sortie standard et erreurs ; `&>` ; `2>/dev/null` | `ls /etc /dossier_inexistant > ok.txt 2> erreurs.txt` : `>` redirige la sortie standard (descripteur 1) et `2>` la sortie d'erreur (descripteur 2). `ok.txt` contient 244 lignes (le titre `/etc:` + 243 entrées) ; `erreurs.txt` contient 1 ligne : `ls: impossible d'accéder à '/dossier_inexistant': Aucun fichier ou dossier de ce type`. `&> tout.txt` envoie les deux dans le même fichier (l'erreur apparaît en premier). `2>/dev/null` envoie les erreurs dans `/dev/null`, qui les fait disparaître : seul le résultat utile reste à l'écran |
+
+![Partie 5, questions 1 et 2](captures/p5-q01-02.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 3 | 5 premières et 5 dernières lignes de /etc/passwd ; `less` | `head -5 /etc/passwd` → `root`, `bin`, `daemon`, `adm`, `lp` ; `tail -5 /etc/passwd` → `dnsmasq`, `chrony`, `tcpdump`, `emsi`, `yassine` (les derniers comptes créés sont à la fin). `less /etc/services` : `Espace`/`b` pour avancer/reculer d'une page, flèches pour une ligne, `/mot` pour chercher, `n` pour l'occurrence suivante, `q` pour quitter |
+
+![Partie 5, question 3](captures/p5-q03.png)
+
+![Partie 5, question 3 : navigation dans less](captures/p5-q03-less.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 4 | `grep` sur son utilisateur ; comptes en /bin/bash | `grep '^yassine:' /etc/passwd` → `yassine:x:1001:1001::/home/yassine:/bin/bash` (`^` = début de ligne : évite d'attraper une autre ligne qui contiendrait « yassine »). `grep -c '/bin/bash$' /etc/passwd` → **3** comptes (`$` = fin de ligne) : `root`, `emsi`, `yassine` |
+| 5 | Extraire et trier les noms d'utilisateurs | `cut -d: -f1 /etc/passwd \| sort` : `-d:` choisit `:` comme séparateur, `-f1` garde le 1er champ, `sort` trie par ordre alphabétique → 35 comptes, de `adm` à `yassine` (affichés en colonnes avec `column` pour la capture) |
+| 6 | Compter les fichiers `.conf` directement dans /etc | `ls /etc \| grep '\.conf$' \| wc -l` → **34** (`\.` = un vrai point, `$` = fin du nom). Vérification avec `find /etc -maxdepth 1 -type f -name '*.conf' \| wc -l` → **32** vrais fichiers : les 2 autres sont des **liens symboliques** (`nsswitch.conf -> /etc/authselect/nsswitch.conf`, `yum.conf -> dnf/dnf.conf`) |
+
+![Partie 5, questions 4 à 6](captures/p5-q04-06.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 7 | `find` par date et par taille | `find /etc -name "*.conf" -mtime -2 2>/dev/null` (`-mtime -2` = modifié il y a moins de 2 jours ; `2>/dev/null` masque les « Permission non accordée » des dossiers réservés à root) → `/etc/resolv.conf` (réécrit par NetworkManager à chaque démarrage), `/etc/modprobe.d/tuned.conf`, `/etc/cups/subscriptions.conf`. `find ~ -type f -size +1M` → 3 fichiers de cache de GNOME (`.cache/mesa_shader_cache/index`, `.cache/gnome-software/...`) |
+
+![Partie 5, question 7](captures/p5-q07.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 8 | `sudo du -sh /var/log/* \| sort -h \| tail -5` | `du -sh` calcule l'espace disque de chaque élément de `/var/log` (`-s` = un total par élément, `-h` = unités lisibles K, M, G) ; `sort -h` trie ces tailles « humaines » de la plus petite à la plus grande ; `tail -5` garde les 5 dernières lignes, donc les 5 plus volumineuses. **Sans `sudo`** (1ère capture), `du` ne peut pas lire plusieurs dossiers (`audit`, `gdm`, `sssd`…) : les erreurs s'affichent et ces dossiers manquent au classement, en tête duquel arrive `anaconda` (8,7M, journaux de l'installation). D'où le besoin de `sudo` (2ème capture) |
+
+![Partie 5, question 8 sans sudo](captures/p5-q08.png)
+
+![Partie 5, question 8 avec sudo](captures/p5-q08-sudo.png)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 9 | `tee` : afficher et enregistrer `ps aux` | `ps aux \| tee processus.txt \| sed -n '1,5p'` : `tee` écrit ce qu'il reçoit **à la fois** dans `processus.txt` et sur sa sortie (l'écran). Ici, l'affichage est limité aux 5 premières lignes avec `sed`, qui lit tout le flux, donc le fichier reste complet. `wc -l processus.txt` → 337 lignes (en-tête + 336 processus) |
+| 10 | `ls -l` de /etc/passwd, /etc/shadow et du répertoire personnel | `-rw-r--r--. 1 root root 1935 29 oct. 09:57 /etc/passwd` : `-` = fichier ordinaire ; `rw-` propriétaire (lecture, écriture), `r--` groupe, `r--` autres (644 : tout le monde peut lire la liste des comptes) ; `.` = contexte SELinux présent ; `1` = nombre de liens ; propriétaire `root`, groupe `root` ; taille 1935 octets ; date de dernière modification (création de l'utilisateur `yassine`). `----------. … /etc/shadow` : **aucun droit** (000), seul root peut le lire, car il contient les mots de passe chiffrés. `drwx------. 16 yassine yassine 4096 … /home/yassine` : `d` = répertoire, `rwx------` (700) = seul `yassine` peut lister, créer et entrer ; 16 liens (ses sous-dossiers + `.` + `..`) ; 4096 = taille du bloc de répertoire |
+
+![Partie 5, questions 9 et 10](captures/p5-q09-10.png)
